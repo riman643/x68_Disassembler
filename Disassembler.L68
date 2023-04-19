@@ -1,0 +1,117 @@
+00001000                             7      ORG    $1000
+00001000                             8  START:                  ; first instruction of program
+00001000                             9  
+00001000                            10  * Put program code here
+00001000                            11  
+00001000  43F9 000010B8             12          LEA         Welcome, A1         *Outputs the Welcome
+00001006  103C 000E                 13          MOVE.B      #14, D0
+0000100A  4E4F                      14          TRAP        #15
+0000100C                            15  
+0000100C                            16  StartAddress
+0000100C  43F9 000010D6             17          LEA         StartM, A1          *Outputs the StartM
+00001012  103C 000E                 18          MOVE.B      #14, D0
+00001016  4E4F                      19          TRAP        #15
+00001018                            20  
+00001018  227C 00000000             21          MOVEA.L     #$00000000,A1
+0000101E  103C 0002                 22          MOVE.B      #2, D0              *Takes in input
+00001022  4E4F                      23          TRAP        #15
+00001024  7400                      24          MOVE.L      #$00000000, D2
+00001026  4EB9 00001052             25          JSR         Table               *Goes to table where each character from input will be moved to D2
+0000102C  2C42                      26          MOVE.L      D2, A6              *Puts the results of input into address register A6
+0000102E                            27  
+0000102E                            28  EndAddress        
+0000102E  43F9 000010F1             29          LEA         EndM, A1            *Outputs the EndM
+00001034  103C 000E                 30          MOVE.B      #14, D0
+00001038  4E4F                      31          TRAP        #15
+0000103A                            32  
+0000103A  103C 0002                 33          MOVE.B      #2, D0              *Takes in output
+0000103E  4E4F                      34          TRAP        #15
+00001040  7400                      35          MOVE.L      #$00000000, D2
+00001042  4EB9 00001052             36          JSR         Table               *Goes to table where each character from input will be moved to D2
+00001048  2E42                      37          MOVE.L      D2, A7              *Puts the results of input into address register A6
+0000104A  6000 0068                 38          BRA         End                 *Ends program
+0000104E                            39  
+0000104E                            40  
+0000104E                            41  Match
+0000104E  0C19 0001                 42          CMP.B       #$1, (A1)+      *Increases A1 to compare the next character taken from input
+00001052                            43  Table
+00001052  0C11 0030                 44  Zero    CMP.B       #$30, (A1)
+00001056  6600 000A                 45          BNE         One
+0000105A  E982                      46          ASL.L       #4, D2              *Shifts bits so if D2 contains $12345678 now contains $23456780
+0000105C  0602 0000                 47          ADD.B       #$0, D2             *
+00001060  60EC                      48          BRA         Match
+00001062                            49  
+00001062  0C11 0031                 50  One     CMP.B       #$31, (A1)
+00001066  6600 0008                 51          BNE         Two
+0000106A  E982                      52          ASL.L       #4, D2
+0000106C  5202                      53          ADD.B       #$1, D2
+0000106E  60DE                      54          BRA         Match
+00001070                            55  
+00001070  0C11 0032                 56  Two     CMP.B       #$32, (A1)
+00001074  6600 0008                 57          BNE         Three
+00001078  E982                      58          ASL.L       #4, D2
+0000107A  5402                      59          ADD.B       #$2, D2
+0000107C  60D0                      60          BRA         Match
+0000107E                            61  
+0000107E                            62  
+0000107E  0C11 0033                 63  Three   CMP.B       #$33, (A1)
+00001082  6600 0008                 64          BNE         Key00
+00001086  E982                      65          ASL.L       #4, D2
+00001088  5602                      66          ADD.B       #$3, D2
+0000108A  60C2                      67          BRA         Match
+0000108C                            68  
+0000108C                            69  *Include other stuff, 0-9 and A-F
+0000108C                            70  
+0000108C  0C11 0000                 71  Key00   CMP.B       #$0, (A1)           *00 means enter, so stop and return when program sees this
+00001090  6600 0004                 72          BNE         Error
+00001094  4E75                      73          RTS
+00001096                            74          
+00001096                            75  Error
+00001096  7400                      76          MOVE.L      #$00000000, D2      *Invalid character, restart and reask for new address
+00001098  22BC 00000000             77          MOVE.L      #$00000000, (A1)
+0000109E  227C 00000000             78          MOVEA.L     #$00000000, A1
+000010A4  43F9 0000110B             79          LEA         Invalid, A1         *Outputs the Invalid
+000010AA                            80          
+000010AA  103C 000E                 81          MOVE.B      #14, D0
+000010AE  4E4F                      82          TRAP        #15
+000010B0  6000 FF5A                 83          BRA         StartAddress        *With invalid address, bug. Should reprint StartM, but doesn't
+000010B4                            84          
+000010B4                            85          
+000010B4  FFFF FFFF                 86  End    SIMHALT             ; halt simulator
+000010B8                            87  
+000010B8                            88  * Put variables and constants here
+000010B8  =0000000D                 89  CR      EQU     $0D
+000010B8  =0000000A                 90  LF      EQU     $0A
+000010B8= 57 65 6C 63 6F 6D ...     91  Welcome DC.B    'Welcome to 68k Disassembler',CR,LF,0
+000010D6= 45 6E 74 65 72 20 ...     92  StartM  DC.B    'Enter a starting address: ',0
+000010F1= 45 6E 74 65 72 20 ...     93  EndM    DC.B    'Enter an ending address: ',0
+0000110B= 49 6E 76 61 6C 69 ...     94  Invalid DC.B    'Invalid Address',CR,LF,0
+0000111D                            95  
+0000111D                            96          
+0000111D                            97      END    START        ; last line of source
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+CR                  D
+END                 10B4
+ENDADDRESS          102E
+ENDM                10F1
+ERROR               1096
+INVALID             110B
+KEY00               108C
+LF                  A
+MATCH               104E
+ONE                 1062
+START               1000
+STARTADDRESS        100C
+STARTM              10D6
+TABLE               1052
+THREE               107E
+TWO                 1070
+WELCOME             10B8
+ZERO                1052
